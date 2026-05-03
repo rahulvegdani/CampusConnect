@@ -1,0 +1,163 @@
+﻿@model IEnumerable<CampusConnect.Models.Product>
+
+<style>
+    /* ===== TITLE ===== */
+    .page-title {
+        font-weight: 700;
+    }
+
+    /* ===== CARD ===== */
+    .wishlist-card {
+        border-radius: 18px;
+        overflow: hidden;
+        transition: 0.3s;
+        position: relative;
+    }
+
+        .wishlist-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.08);
+        }
+
+    /* ===== IMAGE ===== */
+    .wishlist-img {
+        height: 220px;
+        object-fit: cover;
+    }
+
+    /* ===== HEART REMOVE BUTTON ===== */
+    .remove-btn {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: white;
+        border-radius: 50%;
+        padding: 8px 10px;
+        box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+        .remove-btn:hover {
+            background: #fee2e2;
+        }
+
+    /* ===== PRICE ===== */
+    .price {
+        font-size: 18px;
+        font-weight: 600;
+        color: #16a34a;
+    }
+
+    /* ===== CATEGORY ===== */
+    .category {
+        font-size: 13px;
+        color: #64748b;
+    }
+
+    /* ===== BUTTONS ===== */
+    .btn-custom {
+        border-radius: 20px;
+        padding: 5px 14px;
+    }
+
+    /* ===== EMPTY STATE ===== */
+    .empty-box {
+        text-align: center;
+        margin-top: 80px;
+        color: #64748b;
+    }
+</style>
+
+<div class="container mt-4">
+
+    <h2 class="page-title">❤️ My Wishlist</h2>
+
+    @if (!Model.Any())
+    {
+        <div class="empty-box">
+            <h4>😔 Your wishlist is empty</h4>
+            <p>Start adding products you love ❤️</p>
+        </div>
+    }
+    else
+    {
+        <div class="row mt-3">
+
+            @foreach (var item in Model)
+            {
+                <div class="col-md-4 mb-4">
+
+                    <div class="card wishlist-card shadow-sm">
+
+                        <!-- REMOVE BUTTON -->
+                        <a asp-controller="Wishlist"
+                               asp-action="Remove"
+                               asp-route-productId="@item.Id"
+                               class="remove-btn">
+                            ❤️
+                        </a>
+
+                        <!-- IMAGE -->
+                        <img src="@item.ImagePath"
+                             class="card-img-top wishlist-img" />
+
+                        <div class="card-body">
+
+                            <!-- NAME -->
+                            <h5 class="fw-semibold">
+                                @item.Name
+                            </h5>
+
+                            <!-- SOLD BADGE -->
+                            @if (item.IsSold)
+                            {
+                                <span class="badge bg-danger mb-2">
+                                    🔴 Sold
+                                </span>
+                            }
+
+                            <!-- CATEGORY -->
+                            <p class="category mb-1">
+                                @item.Category?.Name
+                            </p>
+
+                            <!-- PRICE -->
+                            <div class="price mb-3">
+                                ₹ @item.Price
+                            </div>
+
+                            <!-- BUTTONS -->
+                            <div class="d-flex gap-2">
+
+                                <a asp-controller="Products"
+                                       asp-action="Details"
+                                       asp-route-id="@item.Id"
+                                       class="btn btn-outline-primary btn-sm btn-custom">
+                                    👁 View
+                                </a>
+
+                                @if (!item.IsSold)
+                                {
+                                    <a asp-controller="Chat"
+                                           asp-action="Index"
+                                           asp-route-userId="@item.UserId"
+                                           asp-route-productId="@item.Id"
+                                           class="btn btn-success btn-sm btn-custom">
+                                        💬 Message
+                                    </a>
+                                }
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+            }
+
+        </div>
+    }
+
+</div>

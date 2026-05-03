@@ -1,0 +1,198 @@
+﻿@model dynamic
+
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Title"] = "User Details";
+}
+
+<div class="container-fluid">
+
+    <!-- PAGE TITLE -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>👤 User Details</h2>
+    </div>
+
+    <!-- PROFILE CARD -->
+    <div class="card shadow-sm mb-4 p-4">
+
+        <div class="d-flex align-items-center">
+
+            <!-- AVATAR -->
+            <div class="me-4">
+                <img src="https://ui-avatars.com/api/?name=@Model.Email&background=2563eb&color=fff"
+                     class="rounded-circle"
+                     width="80" height="80" />
+            </div>
+
+            <!-- USER INFO -->
+            <div>
+                <h4 class="mb-1">@Model.Email</h4>
+                <p class="text-muted mb-1"><strong>Phone:</strong> @(Model.Phone ?? "N/A")</p>
+                <p class="text-muted mb-1"><strong>College:</strong> @(Model.College ?? "N/A")</p>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- STATS SECTION -->
+    <div class="row">
+
+        <div class="col-md-3">
+            <div class="card text-center shadow-sm p-3">
+                <h6>Total Products</h6>
+                <h3 class="text-primary">@Model.TotalProducts</h3>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card text-center shadow-sm p-3">
+                <h6>Approved</h6>
+                <h3 class="text-success">@Model.ApprovedProducts</h3>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card text-center shadow-sm p-3">
+                <h6>Rejected</h6>
+                <h3 class="text-danger">@Model.RejectedProducts</h3>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card text-center shadow-sm p-3">
+                <h6>Pending</h6>
+                <h3 class="text-warning">@Model.PendingProducts</h3>
+            </div>
+        </div>
+
+    </div>
+
+    <hr class="my-4" />
+
+    <!-- 📦 UPLOADED PRODUCTS -->
+    <div class="card p-3 mb-4 shadow-sm">
+        <h5 class="mb-3">📦 Uploaded Products</h5>
+
+        @if (Model.UploadedList.Count == 0)
+        {
+            <p>No products uploaded</p>
+        }
+        else
+        {
+            <ul>
+                @foreach (var item in Model.UploadedList)
+                {
+                    <li>
+                        <strong>@item.Name</strong> - ₹@item.Price
+                        <span class="text-muted">(@item.Category?.Name)</span>
+                    </li>
+                }
+            </ul>
+        }
+    </div>
+
+    <!-- 🛒 SOLD PRODUCTS -->
+    <div class="card p-3 mb-4 shadow-sm">
+        <h5 class="mb-3 text-success">🛒 Sold Products</h5>
+
+        @if (Model.SoldList.Count == 0)
+        {
+            <p>No products sold</p>
+        }
+        else
+        {
+            <ul>
+                @foreach (var item in Model.SoldList)
+                {
+                    <li>
+                        <strong>@item.Name</strong> - ₹@item.Price
+                    </li>
+                }
+            </ul>
+        }
+    </div>
+
+    <!-- 💰 BOUGHT PRODUCTS -->
+    <div class="card p-3 shadow-sm">
+        <h5 class="mb-3 text-primary">💰 Bought Products</h5>
+
+        @if (Model.BoughtList.Count == 0)
+        {
+            <p>No purchases</p>
+        }
+        else
+        {
+            <ul>
+                @foreach (var item in Model.BoughtList)
+                {
+                    <li>
+                        <strong>@item.Name</strong> - ₹@item.Price
+                        <span class="text-muted">(Seller: @item.User?.Email)</span>
+                    </li>
+                }
+            </ul>
+        }
+    </div>
+
+    <!-- SECOND ROW -->
+    <div class="row mt-4">
+
+        <div class="col-md-6">
+            <div class="card text-center shadow-sm p-3">
+                <h6>Products Sold</h6>
+                <h3 class="text-dark">@Model.SoldProducts</h3>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card text-center shadow-sm p-3">
+                <h6>Rating</h6>
+                <h3 class="text-warning">⭐ @Model.Rating</h3>
+            </div>
+        </div>
+
+    </div>
+
+    <hr />
+
+    <h4>⭐ User Reviews</h4>
+
+    @if (Model.Reviews != null && Model.Reviews.Count > 0)
+    {
+        foreach (var review in Model.Reviews)
+        {
+            <div class="border rounded p-3 mb-2">
+
+                <!-- Reviewer -->
+                <strong>👤 @review.Reviewer?.Email</strong>
+
+                <!-- Product -->
+                <div class="text-muted">
+                    📦 @review.Product?.Name
+                </div>
+
+                <!-- Rating -->
+                <div>
+                    ⭐ @review.Rating / 5
+                </div>
+
+                <!-- Comment -->
+                <p class="mb-1">
+                    💬 @review.Comment
+                </p>
+
+                <!-- Date -->
+                <small class="text-muted">
+                    @review.CreatedAt.ToString("dd MMM yyyy hh:mm tt")
+                </small>
+
+            </div>
+        }
+    }
+    else
+    {
+        <p class="text-muted">No reviews available</p>
+    }
+
+</div>

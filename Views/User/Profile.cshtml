@@ -1,0 +1,258 @@
+﻿@{
+    var user = ViewBag.User;
+    var profile = ViewBag.Profile;
+    var isVerified = ViewBag.IsVerified;
+    var completion = ViewBag.Completion;
+    var sold = ViewBag.Sold;
+    var bought = ViewBag.Bought;
+}
+
+<style>
+    .profile-container {
+        max-width: 1000px;
+        margin: auto;
+    }
+
+    .profile-card {
+        background: #fff;
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: 0 15px 40px rgba(0,0,0,0.08);
+        margin-bottom: 20px;
+    }
+
+    .profile-img {
+        width: 130px;
+        height: 130px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 4px solid #e0e7ff;
+    }
+
+    .verified {
+        font-size: 12px;
+        padding: 5px 12px;
+        border-radius: 20px;
+    }
+
+    .progress {
+        height: 20px;
+        border-radius: 20px;
+        overflow: hidden;
+    }
+
+    .stat-box {
+        background: #f8fafc;
+        border-radius: 15px;
+        padding: 15px;
+        text-align: center;
+    }
+
+    .item-list li {
+        padding: 8px 0;
+        border-bottom: 1px solid #eee;
+    }
+
+    .section-title {
+        font-weight: 600;
+        margin-bottom: 15px;
+    }
+
+    a:hover {
+        color: #2563eb;
+        text-decoration: underline;
+    }
+
+</style>
+
+<div class="container mt-5 profile-container">
+
+    <!-- HEADER -->
+    <div class="profile-card text-center">
+
+        <img src="@(profile?.ProfileImagePath ?? "/images/default-user.png")"
+             class="profile-img" />
+
+        <h3 class="mt-3 fw-bold">
+            @profile?.FirstName @profile?.LastName
+        </h3>
+
+        @{
+            double rating = ViewBag.AvgRating ?? 0;
+            int fullStars = (int)Math.Floor(rating);
+            int emptyStars = 5 - fullStars;
+        }
+
+        <div style="margin-top:10px;">
+
+            <div style="font-size:22px;color:#ffc107;">
+                @for (int i = 0; i < fullStars; i++)
+                {
+                    <span>★</span>
+                }
+
+                @for (int i = 0; i < emptyStars; i++)
+                {
+                    <span style="color:#ddd;">★</span>
+                }
+            </div>
+
+            <div style="font-size:13px;color:gray;">
+                (@rating.ToString("0.0")) Rating
+            </div>
+
+        </div>
+
+        @if (isVerified)
+        {
+            <span class="badge bg-success verified">✔ Verified</span>
+        }
+        else
+        {
+            <span class="badge bg-secondary verified">Not Verified</span>
+        }
+
+        <!-- PROGRESS -->
+        <div class="mt-3" style="max-width:300px;margin:auto;">
+            <div class="progress">
+                <div class="progress-bar bg-success"
+                     style="width:@completion%">
+                    @completion%
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- USER INFO -->
+    <div class="profile-card">
+
+        <div class="section-title">👤 User Information</div>
+
+        <div class="row">
+
+            <div class="col-md-4">
+                <div class="stat-box">
+                    <div>📧 Email</div>
+                    <strong>@user?.Email</strong>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="stat-box">
+                    <div>📞 Phone</div>
+                    <strong>@(profile?.PhoneNumber ?? "Not Provided")</strong>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="stat-box">
+                    <div>🏫 College</div>
+                    <strong>@(profile?.College?.Name ?? "Not Provided")</strong>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- STATS -->
+    <div class="profile-card">
+
+        <div class="row text-center">
+
+            <div class="col-md-6">
+                <div class="stat-box">
+                    <h5 class="text-success">📦 Sold Items</h5>
+                    <h3>@sold.Count</h3>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="stat-box">
+                    <h5 class="text-primary">🛒 Bought Items</h5>
+                    <h3>@bought.Count</h3>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- SOLD ITEMS -->
+    <div class="profile-card">
+
+        <div class="section-title text-success">
+            📦 Sold Items (@sold.Count)
+        </div>
+
+        @if (sold.Count == 0)
+        {
+            <p>No items sold yet</p>
+        }
+        else
+        {
+            <ul class="list-unstyled item-list">
+                @foreach (var item in sold)
+                {
+                    <li>
+                        <strong>@item.Name</strong>
+                        <span class="text-success">₹@item.Price</span>
+                    </li>
+                }
+            </ul>
+        }
+
+    </div>
+
+    <!-- BOUGHT ITEMS -->
+    <div class="profile-card">
+
+        <div class="section-title text-primary">
+            🛒 Bought Items (@bought.Count)
+        </div>
+
+        @if (bought.Count == 0)
+        {
+            <p>No items purchased yet</p>
+        }
+        else
+        {
+            <ul class="list-unstyled item-list">
+                @foreach (var item in bought)
+                {
+                    <li>
+                        <strong>@item.Name</strong>
+                        <span class="text-primary">₹@item.Price</span>
+                    </li>
+                }
+            </ul>
+        }
+
+    </div>
+
+    <hr />
+
+    <h5 class="fw-semibold mt-4">⭐ Seller Reviews</h5>
+
+    @if (ViewBag.Reviews != null && ((List<CampusConnect.Models.Review>)ViewBag.Reviews).Any())
+    {
+        foreach (var r in (List<CampusConnect.Models.Review>)ViewBag.Reviews)
+        {
+            <div class="card p-2 mb-2">
+                <a href="/Profile/ViewProfile?userId=@r.ReviewerId"
+                    class="text-decoration-none text-dark">
+                    @(r.Reviewer?.Email ?? "Unknown User")
+                </a> ⭐ @r.Rating / 5 <br />
+                📦 @r.Product?.Name<br />
+                💬 @r.Comment <br />
+                🕒 @r.CreatedAt.ToString("dd MMM yyyy hh:mm tt")
+            </div>
+        }
+    }
+    else
+    {
+        <p>No reviews yet</p>
+    }
+
+</div>

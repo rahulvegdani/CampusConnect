@@ -1,0 +1,228 @@
+﻿@using System.Security.Claims
+@model IEnumerable<CampusConnect.Models.Product>
+
+@{
+    var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+}
+
+<style>
+    .market-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .search-box input {
+        border-radius: 25px;
+        padding: 10px 15px;
+    }
+
+    .search-box button {
+        border-radius: 25px;
+        padding: 8px 18px;
+    }
+
+    .product-card {
+        border: none;
+        border-radius: 18px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        background: white;
+    }
+
+        .product-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+        }
+
+    .product-img {
+        height: 200px;
+        object-fit: cover;
+    }
+
+    .product-placeholder {
+        height: 200px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        background: #f1f5f9;
+        color: #64748b;
+    }
+
+    .price {
+        font-size: 18px;
+        font-weight: 600;
+        color: #16a34a;
+    }
+
+    .seller {
+        font-size: 14px;
+    }
+
+    .btn-custom {
+        border-radius: 20px;
+        font-size: 12px;
+        padding: 5px 10px;
+    }
+
+    .upload-date {
+        font-size: 12px;
+        color: #6b7280;
+    }
+</style>
+
+<div class="container mt-4">
+
+    <div class="market-header">
+        <h2 class="fw-bold">Marketplace</h2>
+
+        <a asp-action="Create" class="btn btn-primary btn-custom">
+            + Sell Item
+        </a>
+    </div>
+
+    <form asp-action="Index" method="get" class="mb-4 search-box">
+        <div class="input-group">
+            <input type="text"
+                   name="searchString"
+                   class="form-control"
+                   placeholder="🔍 Search products..." />
+
+            <button type="submit" class="btn btn-primary">
+                Search
+            </button>
+        </div>
+    </form>
+
+    <div class="row g-4">
+
+        @foreach (var item in Model)
+        {
+            <div class="col-md-4">
+
+                <div class="product-card shadow-sm h-100">
+
+                    <!-- IMAGE -->
+                    @if (!string.IsNullOrEmpty(item.ImagePath))
+                    {
+                        if (item.ImagePath.EndsWith(".pdf"))
+                        {
+                            <div class="product-placeholder">
+                                <h2>📄</h2>
+                                <small>PDF File</small>
+                            </div>
+                        }
+                        else
+                        {
+                            <img src="@item.ImagePath" class="product-img w-100" />
+                        }
+                    }
+                    else
+                    {
+                        <div class="product-placeholder">
+                            <h2>🖼️</h2>
+                            <small>No Image</small>
+                        </div>
+                    }
+
+                    <div class="p-3">
+
+                        <!-- NAME -->
+                        <h5 class="fw-bold">@item.Name</h5>
+
+                        <!-- SELLER -->
+                        <p class="seller mb-1">
+                            👤
+                            <a asp-controller="User"
+                                   asp-action="Profile"
+                                   asp-route-id="@item.UserId"
+                                   class="fw-semibold text-decoration-none text-dark">
+
+                                @(item.User != null ? item.User.Email : "Unknown User")
+                            </a>
+                        </p>
+
+                        <!-- CATEGORY -->
+                        <p class="text-muted mb-1">
+                            @item.Category?.Name
+                        </p>
+
+                        <!-- DESCRIPTION -->
+                        <p class="text-muted small">
+                            @item.Description
+                        </p>
+
+                        <!-- ✅ UPLOAD DATE (NEW) -->
+                        <p class="upload-date mb-2">
+                            📅 @item.CreatedAt.ToString("dd MMM yyyy")
+                            <br />
+                            🕒 @item.CreatedAt.ToString("hh:mm tt")
+                        </p>
+
+                        <!-- PRICE -->
+                        <div class="price mb-2">
+                            ₹ @item.Price
+                        </div>
+
+                        <!-- BUTTONS -->
+                        <div class="d-flex flex-wrap gap-2">
+
+                            <a asp-action="Details"
+                                   asp-route-id="@item.Id"
+                                   class="btn btn-sm btn-info btn-custom">
+                                View
+                            </a>
+
+                            <a asp-controller="Wishlist"
+                                   asp-action="Add"
+                                   asp-route-productId="@item.Id"
+                                   class="btn btn-outline-danger btn-sm btn-custom">
+                                ❤️
+                            </a>
+
+                            @if (item.UserId == currentUserId)
+                            {
+                                <a asp-action="Edit"
+                                       asp-route-id="@item.Id"
+                                       class="btn btn-warning btn-sm btn-custom">
+                                    Edit
+                                </a>
+
+                                <a asp-action="Delete"
+                                       asp-route-id="@item.Id"
+                                       class="btn btn-danger btn-sm btn-custom">
+                                    Delete
+                                </a>
+                            }
+
+                            <a href="@item.ImagePath"
+                                   target="_blank"
+                                   class="btn btn-secondary btn-sm btn-custom">
+                                ⬇
+                            </a>
+
+                            @if (User.Identity.IsAuthenticated && item.UserId != currentUserId)
+                            {
+                                <a asp-controller="Chat"
+                                       asp-action="Index"
+                                       asp-route-userId="@item.UserId"
+                                       asp-route-productId="@item.Id"
+                                       class="btn btn-outline-primary btn-sm btn-custom">
+                                    💬
+                                </a>
+                            }
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+        }
+
+    </div>
+
+</div>

@@ -1,0 +1,150 @@
+﻿@using Microsoft.AspNetCore.Identity
+@inject UserManager<CampusConnect.Models.ApplicationUser> UserManager
+@inject SignInManager<CampusConnect.Models.ApplicationUser> SignInManager
+
+@{
+    var currentUser = await UserManager.GetUserAsync(User);
+
+    if (currentUser != null && currentUser.IsDeleted)
+    {
+        await SignInManager.SignOutAsync();
+        Context.Response.Redirect("/Identity/Account/Login");
+    }
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Panel</title>
+
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+
+    <style>
+            body {
+                margin: 0;
+                background: #f1f5f9;
+            }
+
+            .sidebar {
+                width: 240px;
+                height: 100vh;
+                background: linear-gradient(180deg, #111827, #1f2937);
+                color: white;
+                position: fixed;
+            }
+
+                .sidebar h4 {
+                    text-align: center;
+                    padding: 20px 0;
+                    border-bottom: 1px solid #333;
+                    font-weight: bold;
+                }
+
+                .sidebar a {
+                    display: block;
+                    padding: 12px 20px;
+                    color: #ccc;
+                    text-decoration: none;
+                    transition: 0.2s;
+                }
+
+                    .sidebar a:hover {
+                        background: #374151;
+                        color: white;
+                        padding-left: 25px;
+                    }
+
+            /* 🔥 ACTIVE LINK STYLE */
+            .active-link {
+                background: #2563eb !important;
+                color: white !important;
+                border-left: 4px solid #60a5fa;
+                padding-left: 16px;
+            }
+
+            .content {
+                margin-left: 240px;
+                padding: 25px;
+            }
+
+            .logout {
+                position: absolute;
+                bottom: 20px;
+                width: 100%;
+            }
+    </style>
+
+</head>
+
+<body>
+
+    @{
+        var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+        var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
+
+        Func<string, string, string> isActive = (controller, action) =>
+            currentController == controller && currentAction == action
+            ? "active-link"
+            : "";
+    }
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+
+        <h4>⚡ Admin Panel</h4>
+
+        <a class="@isActive("Admin", "Dashboard")"
+               asp-controller="Admin" asp-action="Dashboard">
+            📊 Dashboard
+        </a>
+
+        <a class="@isActive("Products", "AdminProducts")"
+               asp-controller="Products" asp-action="AdminProducts">
+            📦 All Products
+        </a>
+
+        <a class="@isActive("Products", "ApproveProducts")"
+               asp-controller="Products" asp-action="ApproveProducts">
+            ⏳ Pending
+        </a>
+
+        <a class="@isActive("Products", "RejectedProducts")"
+               asp-controller="Products" asp-action="RejectedProducts">
+            ❌ Rejected
+        </a>
+
+        <a class="@isActive("Products", "SoldProducts")"
+               asp-controller="Products" asp-action="SoldProducts">
+            🛒 Sold Products
+        </a>
+
+        <a class="@isActive("Admin", "Users")"
+               asp-controller="Admin" asp-action="Users">
+            👤 Users
+        </a>
+
+        <a class="@isActive("Categories", "Index")"
+               asp-controller="Categories" asp-action="Index">
+            📂 Categories
+        </a>
+
+        <!-- LOGOUT -->
+        <div class="logout">
+            <form asp-area="Identity" asp-page="/Account/Logout" method="post" style="padding:10px;">
+                <button type="submit" class="btn btn-danger w-100">
+                    🚪 Logout
+                </button>
+            </form>
+        </div>
+
+    </div>
+
+    <!-- CONTENT -->
+    <div class="content">
+        @RenderBody()
+    </div>
+
+    @await RenderSectionAsync("Scripts", required: false)
+
+</body>
+</html>

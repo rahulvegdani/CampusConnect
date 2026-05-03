@@ -1,0 +1,61 @@
+﻿@{
+    ViewData["Title"] = "Rate Seller";
+}
+
+<h3>⭐ Rate Seller</h3>
+
+<form method="post">
+    <input type="hidden" name="productId" value="@ViewBag.ProductId" />
+
+    <!-- ⭐ STAR RATING -->
+    <div class="mb-3">
+        <label>Rating</label><br />
+
+        <div id="stars">
+            @for (int i = 1; i <= 5; i++)
+            {
+                <span class="star" data-value="@i">☆</span>
+            }
+        </div>
+
+        <input type="hidden" name="rating" id="ratingValue" required />
+    </div>
+
+    <!-- COMMENT -->
+    <div class="mb-3">
+        <label>Comment</label>
+        <textarea name="comment" class="form-control"></textarea>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Submit</button>
+</form>
+
+<style>
+    .star {
+        font-size: 30px;
+        cursor: pointer;
+        color: gray;
+    }
+
+        .star.selected {
+            color: gold;
+        }
+</style>
+
+<script>
+    const stars = document.querySelectorAll(".star");
+    const ratingInput = document.getElementById("ratingValue");
+
+    stars.forEach(star => {
+        star.addEventListener("click", function () {
+            let value = this.getAttribute("data-value");
+            ratingInput.value = value;
+
+            stars.forEach(s => s.classList.remove("selected"));
+
+            for (let i = 0; i < value; i++) {
+                stars[i].classList.add("selected");
+            }
+        });
+    });
+</script>

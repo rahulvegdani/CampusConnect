@@ -1,0 +1,160 @@
+﻿@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Title"] = "Admin Dashboard";
+}
+
+<style>
+    body {
+        background-color: #f1f5f9;
+    }
+
+    .dashboard-title {
+        font-weight: 700;
+        margin-bottom: 25px;
+    }
+
+    .stat-card {
+        border-radius: 15px;
+        padding: 20px;
+        color: white;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+        transition: 0.3s;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .stat-title {
+        font-size: 14px;
+        opacity: 0.9;
+    }
+
+    .stat-value {
+        font-size: 28px;
+        font-weight: bold;
+    }
+
+    .bg-blue { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+    .bg-cyan { background: linear-gradient(135deg, #06b6d4, #0891b2); }
+    .bg-green { background: linear-gradient(135deg, #22c55e, #15803d); }
+    .bg-red { background: linear-gradient(135deg, #ef4444, #b91c1c); }
+    .bg-yellow { background: linear-gradient(135deg, #f59e0b, #d97706); }
+    .bg-dark { background: linear-gradient(135deg, #1f2937, #111827); }
+
+    .chart-card {
+        background: white;
+        border-radius: 15px;
+        padding: 20px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+    }
+</style>
+
+<div class="container-fluid px-4 mt-4">
+
+    <h2 class="dashboard-title">📊 Admin Dashboard</h2>
+
+    <!-- 🔥 STATS -->
+    <div class="row g-4 mb-4">
+
+        <div class="col-md-2">
+            <div class="stat-card bg-blue">
+                <div class="stat-title">Total Users</div>
+                <div class="stat-value">@ViewBag.TotalUsers</div>
+            </div>
+        </div>
+
+        <div class="col-md-2">
+            <div class="stat-card bg-cyan">
+                <div class="stat-title">Total Products</div>
+                <div class="stat-value">@ViewBag.TotalProducts</div>
+            </div>
+        </div>
+
+        <div class="col-md-2">
+            <div class="stat-card bg-green">
+                <div class="stat-title">Approved</div>
+                <div class="stat-value">@ViewBag.ApprovedProducts</div>
+            </div>
+        </div>
+
+        <div class="col-md-2">
+            <div class="stat-card bg-red">
+                <div class="stat-title">Rejected</div>
+                <div class="stat-value">@ViewBag.RejectedProducts</div>
+            </div>
+        </div>
+
+        <div class="col-md-2">
+            <div class="stat-card bg-yellow">
+                <div class="stat-title">Pending</div>
+                <div class="stat-value">@ViewBag.PendingProducts</div>
+            </div>
+        </div>
+
+        <div class="col-md-2">
+            <div class="stat-card bg-dark">
+                <div class="stat-title">Sold</div>
+                <div class="stat-value">@ViewBag.SoldProducts</div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- 📊 CHARTS -->
+    <div class="row g-4">
+
+        <div class="col-md-6">
+            <div class="chart-card">
+                <h5 class="fw-semibold mb-3">📦 Product Status</h5>
+                <canvas id="productChart"></canvas>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="chart-card">
+                <h5 class="fw-semibold mb-3">📈 User Growth</h5>
+                <canvas id="userChart"></canvas>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        new Chart(document.getElementById("productChart"), {
+            type: 'bar',
+            data: {
+                labels: ['Approved', 'Rejected', 'Pending', 'Sold'],
+                datasets: [{
+                    label: 'Products',
+                    data: [
+                        @ViewBag.ApprovedProducts,
+                        @ViewBag.RejectedProducts,
+                        @ViewBag.PendingProducts,
+                        @ViewBag.SoldProducts
+                    ]
+                }]
+            }
+        });
+
+        var months = @Html.Raw(Json.Serialize(ViewBag.UserMonths));
+        var counts = @Html.Raw(Json.Serialize(ViewBag.UserCounts));
+
+        new Chart(document.getElementById("userChart"), {
+            type: 'line',
+            data: {
+                labels: months,
+                datasets: [{
+                    label: 'New Users',
+                    data: counts,
+                    fill: true
+                }]
+            }
+        });
+    </script>
+}

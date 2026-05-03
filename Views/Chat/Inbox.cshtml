@@ -1,0 +1,174 @@
+﻿@model IEnumerable<dynamic>
+
+<h2 class="mb-4">💬 Messages</h2>
+
+<form method="get" class="mb-4">
+
+    <div class="input-group">
+
+        <input type="text"
+               name="search"
+               value="@ViewBag.Search"
+               class="form-control"
+               placeholder="🔍 Search by email or product..." />
+
+        <button class="btn btn-primary">
+            Search
+        </button>
+
+    </div>
+
+</form>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">
+        No messages yet.
+    </div>
+}
+else
+{
+    @foreach (var chat in Model)
+    {
+        <div class="card mb-3 shadow-sm p-3 chat-card"
+             data-user="@chat.OtherUserId"
+             data-product="@chat.ProductId">
+
+            <div class="d-flex align-items-center gap-3">
+
+                <!-- PROFILE IMAGE -->
+                <img src="@(string.IsNullOrEmpty(chat.ProfileImage) ? "/images/default-user.png" : chat.ProfileImage)"
+                     style="width:50px;height:50px;border-radius:50%;object-fit:cover;border:2px solid #ddd;" />
+
+                <div style="flex:1">
+
+                    <!-- USER NAME -->
+                    <h5 class="mb-1 @(chat.Unread > 0 ? "fw-bold" : "")">
+                        👤 <b>
+                        <a href="/Profile/ViewProfile?userId=@chat.OtherUserId"
+                               class="text-decoration-none fw-bold">
+                            @chat.BuyerName
+                        </a>
+                    </b>
+                </h5>
+
+                <!-- PRODUCT -->
+                <p class="mb-1 text-muted">
+                    📦 @chat.ProductName
+                </p>
+
+                <!-- MESSAGE COUNT -->
+                <small class="text-muted">
+                    💬 @chat.Count messages
+                </small>
+
+                <!-- UNREAD -->
+                @if (chat.Unread > 0)
+                {
+                    <span class="badge bg-primary">
+                        @chat.Unread
+                    </span>
+                }
+
+            </div>
+
+            <!-- ACTION BUTTONS -->
+            <div class="mt-3 text-end">
+
+                <!-- ⭐ RATE SELLER -->
+                @if (chat.IsSold
+                    && chat.BuyerId == User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
+                    && !chat.AlreadyReviewed)
+                {
+                    <a asp-controller="Review"
+                           asp-action="Create"
+                           asp-route-productId="@chat.ProductId"
+                           class="btn btn-success btn-sm me-2">
+                        ⭐ Rate Seller
+                    </a>
+                }
+
+                <!-- 💬 OPEN CHAT -->
+                <a asp-controller="Chat"
+                       asp-action="Index"
+                       asp-route-userId="@chat.OtherUserId"
+                       asp-route-productId="@chat.ProductId"
+                       class="btn btn-primary btn-sm">
+                    💬 Open Chat
+                </a>
+
+                <!-- 👤 PROFILE -->
+                <a href="/Profile/ViewProfile?userId=@chat.OtherUserId"
+                       class="btn btn-sm btn-outline-secondary ms-2">
+                    👤 Profile
+                </a>
+
+            </div>
+
+            <!-- 🗑 DELETE -->
+            <button class="btn btn-danger btn-sm"
+                    onclick="deleteChatUI('@chat.OtherUserId','@chat.ProductId', this)">
+                🗑
+            </button>
+
+        </div>
+
+    </div>
+}
+}
+
+@section Scripts {
+
+    <script>
+
+        // DELETE UI ONLY
+        function deleteChatUI(userId, productId, btn) {
+
+            if (!confirm("Delete this chat from your view?")) return;
+
+            const key = userId + "_" + productId;
+
+            let deletedChats = JSON.parse(localStorage.getItem("deletedChats") || "[]");
+
+            if (!deletedChats.includes(key)) {
+                deletedChats.push(key);
+                localStorage.setItem("deletedChats", JSON.stringify(deletedChats));
+            }
+
+            btn.closest(".chat-card").remove();
+        }
+
+        // HIDE DELETED ON LOAD
+        window.onload = function () {
+
+            const deletedChats = JSON.parse(localStorage.getItem("deletedChats") || "[]");
+
+            document.querySelectorAll(".chat-card").forEach(card => {
+
+                const user = card.getAttribute("data-user");
+                const product = card.getAttribute("data-product");
+
+                const key = user + "_" + product;
+
+                if (deletedChats.includes(key)) {
+                    card.remove();
+                }
+            });
+
+        };
+
+        // SIGNALR
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/chatHub")
+            .withAutomaticReconnect()
+            .build();
+
+        connection.start();
+
+        connection.on("ReceiveMessage", function () {
+            location.reload();
+        });
+
+    </script>
+
+}

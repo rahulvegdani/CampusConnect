@@ -1,0 +1,211 @@
+﻿@model CampusConnect.Models.UserProfile
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet" />
+
+<style>
+    #collegeDropdown {
+        max-height: 220px;
+        overflow-y: auto;
+        background: white;
+        border-radius: 10px;
+        border: 1px solid #ddd;
+        margin-top: 5px;
+    }
+
+    .college-item {
+        cursor: pointer;
+        padding: 10px;
+        transition: 0.2s;
+    }
+
+        .college-item:hover {
+            background-color: #f1f5f9;
+        }
+</style>
+
+<div class="container mt-4">
+
+    <div class="card shadow-sm p-4">
+
+        <h3 class="mb-4">👤 Complete Your Profile</h3>
+
+        <form asp-action="Create" method="post" enctype="multipart/form-data">
+
+            <!-- PROFILE IMAGE -->
+            <div class="mb-4 text-center">
+
+                <label class="form-label fw-semibold">Profile Picture</label>
+
+                <input type="file" id="imageInput" name="ProfileImage" class="form-control" />
+
+                <div class="mt-3">
+                    <img id="preview"
+                         src="@(Model?.ProfileImagePath ?? "/images/default-user.png")"
+                         style="width:150px;height:150px;border-radius:50%;object-fit:cover;" />
+                </div>
+
+            </div>
+
+            <!-- NAME -->
+            <div class="row">
+
+                <div class="col-md-6 mb-3">
+                    <label>First Name</label>
+                    <input asp-for="FirstName" class="form-control" />
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label>Last Name</label>
+                    <input asp-for="LastName" class="form-control" />
+                </div>
+
+            </div>
+
+            <!-- DOB -->
+            <div class="mb-3">
+                <label>Date of Birth</label>
+                <input asp-for="DateOfBirth" type="date" class="form-control" />
+            </div>
+
+            <!-- PHONE -->
+            <div class="mb-3">
+                <label>Phone Number</label>
+                <input asp-for="PhoneNumber" class="form-control" />
+            </div>
+
+            <!-- ✅ COLLEGE SEARCH (FIXED) -->
+            <div class="form-group position-relative mb-4">
+                <label>Select College</label>
+
+                <input type="text"
+                       id="collegeSearch"
+                       class="form-control"
+                       placeholder="Search your college..."
+                       autocomplete="off"
+                       value="@(Model?.College?.Name ?? "")" />
+
+                <!-- 🔥 IMPORTANT -->
+                <input type="hidden"
+                       name="CollegeId"
+                       id="collegeId"
+                       value="@(Model?.CollegeId?.ToString() ?? "")" />
+
+                <div id="collegeDropdown"
+                     class="position-absolute w-100 shadow"
+                     style="z-index:1000;">
+                </div>
+            </div>
+
+            <!-- BUTTONS -->
+            <div class="d-flex gap-2">
+
+                <button type="submit" class="btn btn-primary">
+                    💾 Save Profile
+                </button>
+
+                <a asp-controller="Home"
+                       asp-action="Index"
+                       class="btn btn-secondary">
+                    Skip For Now
+                </a>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+@section Scripts {
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+
+    <!-- IMAGE CROPPER -->
+    <script>
+        var cropper;
+
+        document.getElementById("imageInput").addEventListener("change", function (e) {
+
+        var file = e.target.files[0];
+        if (!file) return;
+
+        var url = URL.createObjectURL(file);
+
+        var img = document.getElementById("preview");
+        img.src = url;
+
+        if (cropper) cropper.destroy();
+
+        cropper = new Cropper(img, {
+        aspectRatio: 1,
+        viewMode: 1,
+        movable: true,
+        zoomable: true
+        });
+        });
+    </script>
+
+    <!-- JQUERY -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- 🔥 COLLEGE SEARCH FIXED -->
+    <script>
+        $("#collegeSearch").on("keyup", function () {
+
+        let term = $(this).val();
+
+        // ❌ Clear if too short
+        if (term.length < 2) {
+        $("#collegeDropdown").empty();
+        $("#collegeId").val(""); // reset id
+        return;
+        }
+
+        $.get("/Profile/SearchCollege", { term: term }, function (data) {
+
+        let html = "";
+
+        data.forEach(c => {
+        html += `
+        <div class="college-item" data-id="${c.id}" data-name="${c.text}">
+        ${c.text}
+        </div>
+        `;
+        });
+
+        $("#collegeDropdown").html(html);
+        });
+        });
+
+        // ✅ SELECT COLLEGE (IMPORTANT FIX)
+        $(document).on("click", ".college-item", function () {
+
+        let name = $(this).data("name");
+        let id = $(this).data("id");
+
+        $("#collegeSearch").val(name);
+        $("#collegeId").val(id);
+
+        $("#collegeDropdown").empty();
+        });
+
+        // ✅ CLOSE DROPDOWN WHEN CLICK OUTSIDE
+        $(document).click(function (e) {
+        if (!$(e.target).closest("#collegeSearch, #collegeDropdown").length) {
+        $("#collegeDropdown").empty();
+        }
+        });
+
+        // 🚨 PREVENT FORM SUBMIT IF NO COLLEGE SELECTED
+        $("form").submit(function () {
+
+        if (!$("#collegeId").val()) {
+        alert("Please select a college from the list!");
+        return false;
+        }
+
+        return true;
+        });
+    </script>
+}

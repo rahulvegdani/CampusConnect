@@ -1,0 +1,302 @@
+﻿@model IEnumerable<CampusConnect.Models.Product>
+
+@{
+    ViewData["Title"] = "My Products";
+}
+
+<style>
+    .product-card {
+        border-radius: 18px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        background: white;
+    }
+
+        .product-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+        }
+
+    .product-img {
+        height: 180px;
+        object-fit: cover;
+    }
+
+    .badge-status {
+        font-size: 12px;
+        padding: 5px 10px;
+        border-radius: 20px;
+    }
+
+    .btn-custom {
+        border-radius: 20px;
+        font-size: 12px;
+        padding: 5px 10px;
+    }
+</style>
+
+<div class="container mt-4">
+
+    <h2 class="mb-4 fw-bold">My Products</h2>
+
+    <div class="row g-4">
+
+        @foreach (var item in Model)
+        {
+            <div class="col-md-4">
+
+                <div class="product-card shadow-sm h-100">
+
+                    <!-- IMAGE -->
+                    @if (!string.IsNullOrEmpty(item.ImagePath))
+                    {
+                        <img src="@item.ImagePath" class="product-img w-100" />
+                    }
+                    else
+                    {
+                        <div class="d-flex justify-content-center align-items-center bg-light" style="height:180px;">
+                            <span>🖼️ No Image</span>
+                        </div>
+                    }
+
+                    <div class="p-3">
+
+                        <!-- NAME -->
+                        <h5 class="fw-bold">@item.Name</h5>
+
+                        <!-- CATEGORY -->
+                        <p class="text-muted small mb-1">
+                            @item.Category?.Name
+                        </p>
+
+                        <!-- PRICE -->
+                        <div class="text-success fw-bold mb-2">
+                            ₹ @item.Price
+                        </div>
+
+                        <!-- STATUS -->
+                        <div class="mb-2">
+                            @if (item.IsSold)
+                            {
+                                <span class="badge bg-dark badge-status">Sold</span>
+                            }
+                            else if (item.IsApproved)
+                            {
+                                <span class="badge bg-success badge-status">Approved</span>
+                            }
+                            else if (item.IsRejected)
+                            {
+                                <span class="badge bg-danger badge-status">Rejected</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-warning text-dark badge-status">Pending</span>
+                            }
+                        </div>
+
+                        <!-- 👥 INTERESTED USERS -->
+                        @{
+                            var interestDict = ViewBag.ProductInterest as Dictionary<int, List<string>>;
+                            var interestedUsers = interestDict != null && interestDict.ContainsKey(item.Id)
+                                ? interestDict[item.Id]
+                                : new List<string>();
+                        }
+
+                        @if (interestedUsers.Count > 0)
+                        {
+                            <div class="mt-2">
+
+                                <div class="fw-semibold text-primary" style="font-size:14px;">
+                                    👥 Interested (@interestedUsers.Count)
+                                </div>
+
+                                <div style="font-size:13px; color: #555;">
+                                    @foreach (var user in interestedUsers.Take(2))
+                                    {
+                                        <div>• @user</div>
+                                    }
+
+                                    @if (interestedUsers.Count > 2)
+                                    {
+                                        <div class="text-primary" style="cursor:pointer;"
+                                             onclick="showInterestedUsers(@item.Id)">
+                                            + @(interestedUsers.Count - 2) more...
+                                        </div>
+                                    }
+                                </div>
+
+                            </div>
+                        }
+
+                        <!-- ACTIONS -->
+                        <div class="d-flex flex-wrap gap-2 mt-2">
+
+                            <!-- VIEW -->
+                            <a asp-action="Details"
+                                   asp-route-id="@item.Id"
+                                   class="btn btn-info btn-sm btn-custom">
+                                View
+                            </a>
+
+                            <!-- EDIT -->
+                            @if (!item.IsSold)
+                            {
+                                <a asp-action="Edit"
+                                       asp-route-id="@item.Id"
+                                       class="btn btn-warning btn-sm btn-custom">
+                                    Edit
+                                </a>
+                            }
+
+                            <!-- DELETE -->
+                            <a asp-action="Delete"
+                                   asp-route-id="@item.Id"
+                                   class="btn btn-danger btn-sm btn-custom">
+                                Delete
+                            </a>
+
+                            <!-- SELL LOGIC -->
+                            @if (item.IsSold)
+                            {
+                                <button class="btn btn-dark btn-sm btn-custom" disabled>
+                                    Sold
+                                </button>
+                            }
+                            else if (!item.IsApproved)
+                            {
+                                <button class="btn btn-secondary btn-sm btn-custom" disabled>
+                                    Pending Approval
+                                </button>
+                            }
+                            else
+                            {
+                                <button class="btn btn-success btn-sm btn-custom"
+                                        onclick="openSellModal(@item.Id)">
+                                    Sell
+                                </button>
+                            }
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+        }
+
+    </div>
+
+</div>
+
+<!-- ✅ BOOTSTRAP MODAL -->
+
+<div class="modal fade" id="sellModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content p-3">
+
+            <h5 class="mb-3">Select Buyer</h5>
+
+            <select id="buyerSelect" class="form-control mb-3"></select>
+
+            <input type="hidden" id="productId" />
+
+            <button class="btn btn-primary w-100 mb-2" onclick="confirmSell()">
+                Confirm
+            </button>
+
+            <button class="btn btn-outline-secondary w-100" data-bs-dismiss="modal">
+                Cancel
+            </button>
+
+        </div>
+    </div>
+</div>
+
+<!-- 🔥 INTERESTED USERS MODAL -->
+<div class="modal fade" id="interestModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content p-3">
+
+            <h5 class="mb-3">👥 Interested Users</h5>
+
+            <ul id="interestList" class="list-group mb-3"></ul>
+
+            <button class="btn btn-outline-secondary w-100" data-bs-dismiss="modal">
+                Close
+            </button>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    function openSellModal(productId) {
+        document.getElementById("productId").value = productId;
+
+        fetch('/Products/GetChatUsers?productId=' + productId)
+            .then(res => res.json())
+            .then(data => {
+                let select = document.getElementById("buyerSelect");
+                select.innerHTML = "";
+
+                if (data.length === 0) {
+                    select.innerHTML = '<option value="">No buyers found</option>';
+                } else {
+                    data.forEach(user => {
+                        select.innerHTML += `<option value="${user.id}">${user.email}</option>`;
+                    });
+                }
+            });
+
+        var modal = new bootstrap.Modal(document.getElementById('sellModal'));
+        modal.show();
+    }
+
+    function confirmSell() {
+        let productId = document.getElementById("productId").value;
+        let buyerId = document.getElementById("buyerSelect").value;
+
+        if (!buyerId) {
+            alert("Please select a buyer");
+            return;
+        }
+
+        fetch('/Products/MarkSold', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: `productId=${productId}&buyerUserId=${buyerId}`
+        })
+        .then(() => {
+            location.reload();
+        });
+    }
+
+    function showInterestedUsers(productId) {
+
+        fetch('/Products/GetChatUsers?productId=' + productId)
+            .then(res => res.json())
+            .then(data => {
+
+                let list = document.getElementById("interestList");
+                list.innerHTML = "";
+
+                if (data.length === 0) {
+                    list.innerHTML = "<li class='list-group-item'>No interested users</li>";
+                } else {
+                    data.forEach(user => {
+                        list.innerHTML += `
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                ${user.email}
+                            </li>`;
+                    });
+                }
+
+                var modal = new bootstrap.Modal(document.getElementById('interestModal'));
+                modal.show();
+            });
+    }
+
+</script>

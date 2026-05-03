@@ -1,0 +1,228 @@
+﻿@using System.Security.Claims
+
+@{
+    var receiverId = ViewBag.ReceiverId ?? "";
+    var productId = ViewBag.ProductId ?? 0;
+    var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "";
+    DateTime? lastDate = null;
+}
+
+<style>
+.chat-wrapper { max-width: 900px; margin: auto; }
+
+#chatBox {
+    height: 500px;
+    overflow-y: auto;
+    padding: 20px;
+    background: linear-gradient(to bottom, #eef2ff, #f8fafc);
+    border-radius: 15px;
+}
+
+.message-row { display: flex; margin-bottom: 12px; }
+.message-row.me { justify-content: flex-end; }
+.message-row.other { justify-content: flex-start; }
+
+.message {
+    max-width: 65%;
+    padding: 12px 16px;
+    border-radius: 18px;
+    font-size: 14px;
+}
+
+.message.me { background: #2563eb; color: white; }
+.message.other { background: white; border: 1px solid #e2e8f0; }
+
+.time {
+    font-size: 11px;
+    text-align: right;
+    margin-top: 4px;
+    opacity: 0.7;
+}
+
+.date-divider {
+    text-align: center;
+    margin: 15px 0;
+}
+
+.date-divider span {
+    background: #64748b;
+    color: white;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+}
+
+.chat-input { margin-top: 10px; }
+
+.chat-user-link {
+    text-decoration: none;
+    font-weight: 600;
+    color: #2563eb;
+}
+.chat-user-link:hover {
+    text-decoration: underline;
+}
+</style>
+
+<div class="chat-wrapper">
+
+    <h4>💬 Chat</h4>
+
+    <!-- ✅ FIXED PROFILE LINK -->
+    <h6>
+        👤 
+        <a href="/Profile/ViewProfile?userId=@receiverId"
+           class="chat-user-link">
+           @ViewBag.ReceiverEmail
+        </a>
+
+    </h6>
+
+    <h6 class="text-muted">📦 @ViewBag.ProductName</h6>
+
+    <div id="chatBox">
+
+        @foreach (var msg in ViewBag.Messages)
+        {
+            var isMe = msg.SenderId == currentUserId;
+            var msgDate = msg.Timestamp.Date;
+
+            if (lastDate == null || lastDate != msgDate)
+            {
+                <div class="date-divider">
+                    <span>
+                        @(msgDate == DateTime.Today ? "Today" :
+                          msgDate == DateTime.Today.AddDays(-1) ? "Yesterday" :
+                          msgDate.ToString("dd MMM yyyy"))
+                    </span>
+                </div>
+
+                lastDate = msgDate;
+            }
+
+            <div class="message-row @(isMe ? "me" : "other")">
+                <div class="message @(isMe ? "me" : "other")" data-id="@msg.Id">
+
+                    @msg.Message
+
+                    <div class="time">
+                        @msg.Timestamp.ToString("hh:mm tt")
+                    </div>
+
+                    @if (isMe)
+                    {
+                        <div class="time" id="tick-@msg.Id">
+                            @(msg.IsSeen ? "✔✔ Seen" : "✔ Delivered")
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+
+    </div>
+
+    <div class="input-group chat-input">
+        <input type="text" id="messageInput" class="form-control" placeholder="Type message..." />
+        <button onclick="sendMessage()" class="btn btn-primary">Send</button>
+    </div>
+
+</div>
+
+@section Scripts {
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+
+<script>
+const receiverId = "@receiverId";
+const senderId = "@currentUserId";
+const productId = parseInt("@productId");
+
+const chatBox = document.getElementById("chatBox");
+const input = document.getElementById("messageInput");
+
+window.chatConnection = new signalR.HubConnectionBuilder()
+    .withUrl("/chatHub")
+    .build();
+
+chatConnection.start();
+
+// RECEIVE MESSAGE
+chatConnection.on("ReceiveMessage", function (data) {
+
+    const isMe = data.senderId === senderId;
+    const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+    // ✅ PREVENT DUPLICATE MESSAGE BUG
+    if (document.querySelector(`[data-id='${data.messageId}']`)) return;
+
+    if (isMe) {
+        const tempDiv = document.getElementById(window.lastTempId);
+
+        if (tempDiv) {
+            tempDiv.removeAttribute("id");
+
+            const msgBox = tempDiv.querySelector(".message");
+            msgBox.setAttribute("data-id", data.messageId);
+
+            const tick = msgBox.querySelector(".time:last-child");
+            if (tick) tick.innerHTML = "✔✔ Delivered";
+        }
+
+    } else {
+        const msgHtml = `
+        <div class="message-row other">
+            <div class="message other" data-id="${data.messageId}">
+                ${data.message}
+                <div class="time">${time}</div>
+            </div>
+        </div>`;
+
+        chatBox.insertAdjacentHTML("beforeend", msgHtml);
+        scrollToBottom();
+
+        chatConnection.invoke("MarkAsSeen", data.messageId, data.senderId);
+    }
+});
+
+// SEND MESSAGE
+function sendMessage() {
+
+    const message = input.value.trim();
+    if (!message) return;
+
+    const tempId = "temp-" + Date.now();
+    const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+    const msgHtml = `
+    <div class="message-row me" id="${tempId}">
+        <div class="message me">
+            ${message}
+            <div class="time">${time}</div>
+            <div class="time">✔ Sending...</div>
+        </div>
+    </div>`;
+
+    chatBox.insertAdjacentHTML("beforeend", msgHtml);
+    scrollToBottom();
+
+    window.lastTempId = tempId;
+
+    chatConnection.invoke("SendMessage", senderId, receiverId, message, productId);
+
+    input.value = "";
+}
+
+function scrollToBottom() {
+    setTimeout(() => {
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }, 100);
+}
+
+window.onload = function () {
+    scrollToBottom();
+};
+
+setTimeout(scrollToBottom, 300);
+
+</script>
+}

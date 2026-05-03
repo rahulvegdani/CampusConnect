@@ -1,0 +1,249 @@
+﻿@model CampusConnect.Models.UserProfile
+
+<style>
+    body {
+        background-color: #f1f5f9;
+    }
+
+    .profile-card {
+        border-radius: 16px;
+        background: white;
+        padding: 25px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+        width: 100%;
+    }
+
+    .profile-page-img {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid #e0e7ff;
+    }
+
+    .info-text {
+        color: #64748b;
+        font-size: 14px;
+        margin-bottom: 5px;
+    }
+
+    .btn-custom {
+        border-radius: 25px;
+        padding: 8px 20px;
+    }
+
+    .progress {
+        height: 20px;
+        border-radius: 20px;
+        overflow: hidden;
+        background-color: #e2e8f0;
+    }
+
+    .progress-bar {
+        font-size: 12px;
+        font-weight: 600;
+    }
+</style>
+
+<div class="container-fluid mt-5 px-5">
+
+    <h2 class="mb-4 fw-bold">My Profile</h2>
+
+    <div class="row g-4">
+
+        <!-- ================= LEFT ================= -->
+        <div class="col-md-4">
+
+            <div class="profile-card text-center">
+
+                <img src="@(Model?.ProfileImagePath ?? "/images/default-user.png")"
+                     class="profile-page-img mb-3" />
+
+                <h4 class="fw-bold">
+                    @(Model?.FirstName ?? "") @(Model?.LastName ?? "")
+                </h4>
+
+                <p class="info-text">@User.Identity?.Name</p>
+
+                <p class="info-text">📞 @(Model?.PhoneNumber ?? "Not added")</p>
+
+                <p class="info-text">
+                    🎓 @(Model?.College?.Name ?? "College not selected")
+                </p>
+
+                <a asp-controller="Profile"
+                       asp-action="Create"
+                       class="btn btn-primary btn-custom mt-2">
+                    ✏ Edit Profile
+                </a>
+
+                <form asp-action="DeleteAccount"
+                      method="post"
+                      onsubmit="return confirm('Are you sure? This cannot be undone.');">
+
+                    <button type="submit"
+                            class="btn btn-danger btn-custom mt-2 w-100">
+                        🗑 Delete Account
+                    </button>
+
+                </form>
+
+            </div>
+
+            <!-- PROFILE COMPLETION -->
+            <div class="profile-card mt-3">
+
+                <h6 class="fw-semibold mb-2">Profile Completion</h6>
+
+                <div class="progress">
+                    <div class="progress-bar bg-success"
+                         style="width:@ViewBag.Completion%">
+                        @ViewBag.Completion%
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- ================= RIGHT ================= -->
+        <div class="col-md-8">
+
+            <!-- ⭐ RATING -->
+            <div class="profile-card text-center mb-3">
+
+                @{
+                    double rating = ViewBag.AvgRating ?? 0;
+                    int fullStars = (int)Math.Floor(rating);
+                    int emptyStars = 5 - fullStars;
+                }
+
+                <h5 class="fw-semibold">⭐ Your Rating</h5>
+
+                <div style="font-size:22px;color:#ffc107;">
+                    @for (int i = 0; i < fullStars; i++)
+                    {
+                        <span>★</span>
+                    }
+
+                    @for (int i = 0; i < emptyStars; i++)
+                    {
+                        <span style="color:#ddd;">★</span>
+                    }
+                </div>
+
+                <div class="text-muted">@rating.ToString("0.0") / 5</div>
+
+            </div>
+
+            <!-- STATS -->
+            <div class="row g-3 mb-3">
+
+                <div class="col-md-6">
+                    <div class="profile-card text-center">
+                        <h6 class="text-success">📦 Sold Items</h6>
+                        <h3>@(ViewBag.Sold?.Count ?? 0)</h3>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="profile-card text-center">
+                        <h6 class="text-primary">🛒 Bought Items</h6>
+                        <h3>@(ViewBag.Bought?.Count ?? 0)</h3>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- SOLD ITEMS -->
+            <div class="profile-card mb-3">
+
+                <h6 class="text-success fw-semibold">📦 Sold Items</h6>
+
+                @if (ViewBag.Sold == null || ViewBag.Sold.Count == 0)
+                {
+                    <p class="text-muted">No items sold yet</p>
+                }
+                else
+                {
+                    <ul class="list-unstyled">
+                        @foreach (var item in ViewBag.Sold)
+                        {
+                            <li class="mb-2">
+                                <strong>@item.Name</strong>
+                                <span class="text-success">₹@item.Price</span>
+                            </li>
+                        }
+                    </ul>
+                }
+
+            </div>
+
+            <!-- BOUGHT ITEMS -->
+            <div class="profile-card">
+
+                <h6 class="text-primary fw-semibold">🛒 Bought Items</h6>
+
+                @if (ViewBag.Bought == null || ViewBag.Bought.Count == 0)
+                {
+                    <p class="text-muted">No items purchased yet</p>
+                }
+                else
+                {
+                    <ul class="list-unstyled">
+                        @foreach (var item in ViewBag.Bought)
+                        {
+                            <li class="mb-2">
+                                <strong>@item.Name</strong>
+                                <span class="text-primary">₹@item.Price</span>
+                            </li>
+                        }
+                    </ul>
+                }
+
+            </div>
+
+            <!-- ⭐ REVIEWS -->
+            <div class="profile-card mt-3">
+
+                <h6 class="fw-semibold">⭐ Seller Reviews</h6>
+
+                @if (ViewBag.Reviews != null && ViewBag.Reviews.Count > 0)
+                {
+                    @foreach (var r in (List<CampusConnect.Models.Review>)ViewBag.Reviews)
+                    {
+                        <div class="card p-3 mb-2">
+
+                            <b>
+                                👤
+                                <a href="/Profile/ViewProfile?userId=@r.ReviewerId"
+                                       class="text-decoration-none text-dark">
+                                    @(r.Reviewer?.Email ?? "Unknown User")
+                                </a>
+                            </b>
+
+                            <div>⭐ @r.Rating / 5</div>
+
+                            <div>📦 @(r.Product?.Name ?? "Unknown Product")</div>
+
+                            <div>💬 @(string.IsNullOrEmpty(r.Comment) ? "No comment" : r.Comment)</div>
+
+                            <small class="text-muted">
+                                🕒 @r.CreatedAt.ToString("dd MMM yyyy hh:mm tt")
+                            </small>
+
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p class="text-muted">No reviews yet</p>
+                }
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

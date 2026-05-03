@@ -1,0 +1,91 @@
+﻿@model CampusConnect.Models.Product
+
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Title"] = "Product Details";
+}
+
+<div class="container-fluid mt-4">
+
+    <h2 class="fw-bold mb-4">📦 Product Details</h2>
+
+    <div class="card shadow p-4">
+
+        <div class="row">
+
+            <!-- IMAGE -->
+            <div class="col-md-5 text-center">
+                <img src="@(Model.ImagePath ?? "/images/no-image.png")"
+                     class="img-fluid rounded"
+                     style="max-height:350px;" />
+            </div>
+
+            <!-- DETAILS -->
+            <div class="col-md-7">
+
+                <h3 class="fw-bold">@Model.Name</h3>
+
+                <p><strong>Category:</strong> @Model.Category?.Name</p>
+
+                <h4 class="text-success">₹ @Model.Price</h4>
+
+                <p><strong>Description:</strong><br />@Model.Description</p>
+
+                <hr />
+
+                <p><strong>Seller:</strong> @Model.User?.Email</p>
+
+                <p>
+                    <strong>Uploaded At:</strong>
+                    @Model.CreatedAt.ToString("dd MMM yyyy hh:mm tt")
+                </p>
+
+                <p>
+                    <strong>Status:</strong>
+                    @if (Model.IsSold)
+                    {
+                        <span class="badge bg-info">Sold</span>
+                    }
+                    else if (Model.IsRejected)
+                    {
+                        <span class="badge bg-danger">Rejected</span>
+                    }
+                    else if (Model.IsApproved)
+                    {
+                        <span class="badge bg-success">Approved</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-warning text-dark">Pending</span>
+                    }
+                </p>
+
+                <br />
+
+                <!-- ACTIONS -->
+                <a asp-action="AdminProducts" class="btn btn-secondary">
+                    ← Back
+                </a>
+
+                @if (!Model.IsApproved && !Model.IsRejected)
+                {
+                    <a asp-action="Approve"
+                           asp-route-id="@Model.Id"
+                           class="btn btn-success ms-2">
+                        ✔ Approve
+                    </a>
+
+                    <a asp-action="Reject"
+                           asp-route-id="@Model.Id"
+                           class="btn btn-danger ms-2">
+                        ✖ Reject
+                    </a>
+                }
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

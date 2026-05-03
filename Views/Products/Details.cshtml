@@ -1,0 +1,195 @@
+﻿@using System.Security.Claims
+
+@model CampusConnect.Models.Product
+
+@{
+    ViewData["Title"] = "Product Details";
+}
+
+<style>
+    .details-card {
+        border-radius: 20px;
+        padding: 30px;
+        background: #fff;
+        box-shadow: 0 15px 40px rgba(0,0,0,0.08);
+    }
+
+    .product-img {
+        width: 100%;
+        height: 320px;
+        object-fit: cover;
+        border-radius: 15px;
+    }
+
+    .price {
+        font-size: 26px;
+        font-weight: bold;
+        color: #16a34a;
+    }
+
+    .badge-status {
+        font-size: 13px;
+        padding: 6px 12px;
+        border-radius: 20px;
+    }
+
+    .info-label {
+        font-weight: 600;
+        color: #555;
+    }
+
+    .btn-custom {
+        border-radius: 25px;
+        padding: 8px 20px;
+    }
+</style>
+
+<div class="container mt-5">
+
+    <div class="details-card">
+
+        <div class="row">
+
+            <!-- LEFT: IMAGE -->
+            <div class="col-md-5">
+                @if (!string.IsNullOrEmpty(Model.ImagePath))
+                {
+                    <img src="@Model.ImagePath" class="product-img" />
+                }
+                else
+                {
+                    <div class="d-flex justify-content-center align-items-center bg-light"
+                         style="height:320px;border-radius:15px;">
+                        <span>No Image</span>
+                    </div>
+                }
+            </div>
+
+            <!-- RIGHT: DETAILS -->
+            <div class="col-md-7">
+
+                <h2 class="fw-bold mb-2">@Model.Name</h2>
+
+                @if (TempData["Error"] != null)
+                {
+                    <div class="alert alert-danger">
+                        @TempData["Error"]
+                    </div>
+                }
+
+                <!-- CATEGORY -->
+                <p class="text-muted mb-2">
+                    Category: @Model.Category?.Name
+                </p>
+
+                <!-- PRICE -->
+                <div class="price mb-3">
+                    ₹ @Model.Price
+                </div>
+
+                <!-- STATUS -->
+                <div class="mb-3">
+                    @if (Model.IsSold)
+                    {
+                        <span class="badge bg-dark badge-status">Sold</span>
+                    }
+                    else if (!Model.IsApproved)
+                    {
+                        <span class="badge bg-warning text-dark badge-status">
+                            Pending Approval
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-success badge-status">
+                            Available
+                        </span>
+                    }
+                </div>
+
+                <!-- DESCRIPTION -->
+                <div class="mb-3">
+                    <span class="info-label">Description:</span>
+                    <p>@Model.Description</p>
+                </div>
+
+                <hr />
+                <h4>⭐ Product Reviews</h4>
+
+                @if (ViewBag.ProductReviews != null && ViewBag.ProductReviews.Count > 0)
+                {
+                    foreach (var review in ViewBag.ProductReviews)
+                    {
+                        <div class="border rounded p-2 mb-2">
+
+                            <strong>@review.Reviewer?.Email</strong>
+                            ⭐ @review.Rating
+
+                            <p>@review.Comment</p>
+
+                            <small>@review.CreatedAt.ToString("dd MMM yyyy hh:mm tt")</small>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p>No reviews yet</p>
+                }
+
+                <!-- VIEWS -->
+                <div class="mb-3 text-muted">
+                    👁 Views: @ViewBag.Views
+                </div>
+
+                <!-- SELLER -->
+                <div class="mb-4">
+                    <span class="info-label">Seller:</span>
+                    <p class="mb-2">
+                        @(Model.User?.Email ?? "Unknow User")
+                    </p>
+
+                    <a asp-controller="Profile"
+                           asp-action="ViewProfile"
+                           asp-route-userId="@Model.UserId"
+                           class="btn btn-outline-primary btn-custom">
+                        👤 View Seller Profile
+                    </a>
+                </div>
+
+                <!-- ACTION BUTTONS -->
+                <div class="d-flex gap-3">
+
+                    @if (User.Identity.IsAuthenticated && !Model.IsSold)
+                    {
+                        <a asp-controller="Chat"
+                               asp-action="StartChat"
+                               asp-route-productId="@Model.Id"
+                               class="btn btn-primary btn-custom">
+                            💬 Chat with Seller
+                        </a>
+                    }
+
+                    <a asp-action="Index" class="btn btn-outline-secondary btn-custom">
+                        ⬅ Back
+                    </a>
+
+                    @if (User.Identity.IsAuthenticated 
+                    && Model.UserId !=User.FindFirstValue(ClaimTypes.NameIdentifier)
+                    && Model.IsSold)
+                    {
+                        <a asp-controller="Review"
+                               asp-action="Create"
+                               asp-route-productId="@Model.Id"
+                               class="btn btn-warning btn-custom">
+                            ⭐ Rate Seller
+                        </a>
+                    }
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

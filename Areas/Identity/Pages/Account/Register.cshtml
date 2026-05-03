@@ -1,0 +1,158 @@
+﻿@page
+@model CampusConnect.Areas.Identity.Pages.Account.RegisterModel
+
+@{
+    ViewData["Title"] = "Register";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-5">
+
+            <div class="card shadow-lg border-0 rounded-4">
+                <div class="card-header bg-success text-white text-center rounded-top-4">
+                    <h4 class="mb-0">Create Account</h4>
+                </div>
+
+                <div class="card-body p-4">
+
+                    <form method="post">
+
+                        @Html.AntiForgeryToken()
+
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                        <!-- EMAIL -->
+                        <div class="mb-3">
+                            <label asp-for="Input.Email" class="form-label fw-semibold"></label>
+
+                            <div class="input-group">
+                                <input asp-for="Input.Email" id="emailInput" class="form-control" />
+                                <button type="button" id="sendOtpBtn" class="btn btn-primary">
+                                    Send Code
+                                </button>
+                            </div>
+
+                            <span asp-validation-for="Input.Email" class="text-danger"></span>
+                        </div>
+
+                        <!-- OTP -->
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Enter Code</label>
+
+                            <div class="input-group">
+                                <input type="text" id="otpInput" class="form-control" placeholder="Enter OTP" />
+                                <button type="button" id="verifyOtpBtn" class="btn btn-success">
+                                    Verify
+                                </button>
+                            </div>
+
+                            <small id="otpMessage" class="fw-semibold"></small>
+                        </div>
+
+                        <!-- PASSWORD -->
+                        <div class="mb-3">
+                            <label asp-for="Input.Password" class="form-label fw-semibold"></label>
+                            <input asp-for="Input.Password" class="form-control" />
+                            <span asp-validation-for="Input.Password" class="text-danger"></span>
+                        </div>
+
+                        <!-- CONFIRM PASSWORD -->
+                        <div class="mb-3">
+                            <label asp-for="Input.ConfirmPassword" class="form-label fw-semibold"></label>
+                            <input asp-for="Input.ConfirmPassword" class="form-control" />
+                            <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
+                        </div>
+
+                        <!-- REGISTER -->
+                        <button type="submit" class="btn btn-success w-100 fw-bold">
+                            Register
+                        </button>
+
+                    </form>
+
+                </div>
+
+                <div class="card-footer text-center">
+                    Already have an account?
+                    <a asp-page="/Account/Login">Login</a>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        let isOtpVerified = false;
+
+        function getAntiForgeryToken() {
+            return document.querySelector('input[name="__RequestVerificationToken"]').value;
+        }
+
+        // SEND OTP
+        document.getElementById("sendOtpBtn").onclick = function () {
+
+            let email = document.getElementById("emailInput").value;
+
+            fetch('/Identity/Account/Register?handler=SendOtp', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'RequestVerificationToken': getAntiForgeryToken() // 🔥 FIX
+                },
+                body: 'email=' + email
+            })
+            .then(res => res.json())
+            .then(data => {
+                alert("OTP sent");
+            })
+            .catch(() => alert("Error sending OTP"));
+        };
+
+        // VERIFY OTP
+        document.getElementById("verifyOtpBtn").onclick = function () {
+
+            let email = document.getElementById("emailInput").value;
+            let otp = document.getElementById("otpInput").value;
+
+            fetch('/Identity/Account/Register?handler=VerifyOtp', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'RequestVerificationToken': getAntiForgeryToken() // 🔥 FIX
+                },
+                body: 'email=' + email + '&otp=' + otp
+            })
+            .then(res => res.json())
+            .then(data => {
+
+                let msg = document.getElementById("otpMessage");
+
+                if (data.success) {
+                    msg.innerText = "✔ Verified";
+                    msg.style.color = "green";
+                    isOtpVerified = true;
+                } else {
+                    msg.innerText = "❌ Invalid code";
+                    msg.style.color = "red";
+                    isOtpVerified = false;
+                }
+            })
+            .catch(() => alert("Verification failed"));
+        };
+
+        // BLOCK REGISTER
+        document.querySelector("form").addEventListener("submit", function (e) {
+
+            if (!isOtpVerified) {
+                e.preventDefault();
+                alert("Please verify OTP first");
+            }
+        });
+    </script>
+}

@@ -1,0 +1,133 @@
+﻿@model CampusConnect.Models.Product
+
+<style>
+    .form-card {
+        max-width: 600px;
+        margin: auto;
+        border-radius: 20px;
+        box-shadow: 0 15px 40px rgba(0,0,0,0.08);
+        overflow: hidden;
+    }
+
+    .form-header {
+        background: linear-gradient(135deg, #2563eb, #1e40af);
+        color: white;
+        padding: 20px;
+        text-align: center;
+        font-weight: 600;
+        font-size: 20px;
+    }
+
+    .form-body {
+        padding: 30px;
+        background: white;
+    }
+
+    .form-control {
+        border-radius: 12px;
+        padding: 10px 12px;
+    }
+
+    textarea.form-control {
+        height: 100px;
+        resize: none;
+    }
+
+    .btn-save {
+        border-radius: 25px;
+        padding: 10px;
+        font-weight: 500;
+        transition: 0.3s;
+    }
+
+        .btn-save:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+
+    .image-preview {
+        width: 100%;
+        max-height: 200px;
+        object-fit: cover;
+        border-radius: 12px;
+        margin-top: 10px;
+        display: none;
+    }
+</style>
+
+<div class="container mt-5">
+
+    <div class="form-card">
+
+        <div class="form-header">
+            📦 Add New Product
+        </div>
+
+        <div class="form-body">
+
+            <form asp-action="Create" enctype="multipart/form-data">
+
+                <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+                <!-- NAME -->
+                <div class="mb-3">
+                    <label asp-for="Name" class="form-label fw-semibold"></label>
+                    <input asp-for="Name" class="form-control" placeholder="Enter product name" />
+                </div>
+
+                <!-- DESCRIPTION -->
+                <div class="mb-3">
+                    <label asp-for="Description" class="form-label fw-semibold"></label>
+                    <textarea asp-for="Description" class="form-control" placeholder="Enter product details"></textarea>
+                </div>
+
+                <!-- PRICE -->
+                <div class="mb-3">
+                    <label asp-for="Price" class="form-label fw-semibold"></label>
+                    <input asp-for="Price" class="form-control" placeholder="Enter price" />
+                </div>
+
+                <!-- CATEGORY -->
+                <div class="mb-3">
+                    <label asp-for="CategoryId" class="form-label fw-semibold"></label>
+
+                    <select asp-for="CategoryId"
+                            class="form-control"
+                            asp-items="ViewBag.CategoryId">
+                        <option value="">-- Select Category --</option>
+                    </select>
+
+                    <span asp-validation-for="CategoryId" class="text-danger"></span>
+                </div>
+
+                <!-- IMAGE -->
+                <div class="mb-3">
+                    <label asp-for="ImageFile" class="form-label fw-semibold"></label>
+                    <input asp-for="ImageFile" type="file" class="form-control" id="imageInput" />
+
+                    <img id="preview" class="image-preview" />
+                </div>
+
+                <!-- BUTTON -->
+                <button type="submit" class="btn btn-success w-100 btn-save">
+                    🚀 Save Product
+                </button>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    // IMAGE PREVIEW
+    document.getElementById("imageInput").addEventListener("change", function (event) {
+        const file = event.target.files[0];
+        const preview = document.getElementById("preview");
+
+        if (file) {
+            preview.src = URL.createObjectURL(file);
+            preview.style.display = "block";
+        }
+    });
+</script>

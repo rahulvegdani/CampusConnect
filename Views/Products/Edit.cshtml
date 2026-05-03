@@ -1,0 +1,134 @@
+﻿@model CampusConnect.Models.Product
+
+@{
+    ViewData["Title"] = "Edit Product";
+}
+
+<style>
+    .edit-container {
+        max-width: 700px;
+        margin: auto;
+    }
+
+    .edit-card {
+        border-radius: 20px;
+        padding: 30px;
+        background: #fff;
+        box-shadow: 0 15px 40px rgba(0,0,0,0.08);
+    }
+
+    .form-control, .form-select {
+        border-radius: 12px;
+        padding: 10px;
+    }
+
+    .form-label {
+        font-weight: 600;
+    }
+
+    .btn-custom {
+        border-radius: 25px;
+        padding: 10px 20px;
+    }
+
+    .img-preview {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+        border-radius: 12px;
+        margin-bottom: 15px;
+        border: 1px solid #eee;
+    }
+</style>
+
+<div class="container mt-5 edit-container">
+
+    <div class="edit-card">
+
+        <h3 class="fw-bold mb-4">✏ Edit Product</h3>
+
+        <form asp-action="Edit">
+
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <input type="hidden" asp-for="Id" />
+            <input type="hidden" asp-for="UserId" />
+            <input type="hidden" asp-for="ImagePath" />
+
+            <!-- IMAGE PREVIEW -->
+            @if (!string.IsNullOrEmpty(Model.ImagePath))
+            {
+                <img src="@Model.ImagePath" class="img-preview" />
+            }
+
+            <!-- NAME -->
+            <div class="mb-3">
+                <label asp-for="Name" class="form-label"></label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+
+            <!-- DESCRIPTION -->
+            <div class="mb-3">
+                <label asp-for="Description" class="form-label"></label>
+                <textarea asp-for="Description" class="form-control"></textarea>
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+
+            <!-- PRICE -->
+            <div class="mb-3">
+                <label asp-for="Price" class="form-label"></label>
+                <input asp-for="Price" class="form-control" />
+                <span asp-validation-for="Price" class="text-danger"></span>
+            </div>
+
+            <!-- CATEGORY -->
+            <div class="mb-3">
+                <label asp-for="CategoryId" class="form-label"></label>
+                <select asp-for="CategoryId"
+                        asp-items="ViewBag.CategoryId"
+                        class="form-select">
+                </select>
+                <span asp-validation-for="CategoryId" class="text-danger"></span>
+            </div>
+
+            <!-- STATUS DISPLAY ONLY -->
+            <div class="mb-3">
+                @if (Model.IsSold)
+                {
+                    <span class="badge bg-dark">Sold</span>
+                }
+                else if (!Model.IsApproved)
+                {
+                    <span class="badge bg-warning text-dark">Pending Approval</span>
+                }
+                else
+                {
+                    <span class="badge bg-success">Approved</span>
+                }
+            </div>
+
+            <!-- BUTTONS -->
+            <div class="d-flex gap-3 mt-4">
+
+                <button type="submit" class="btn btn-primary btn-custom">
+                    💾 Save Changes
+                </button>
+
+                <a asp-action="MyProducts" class="btn btn-outline-secondary btn-custom">
+                    ⬅ Back
+                </a>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

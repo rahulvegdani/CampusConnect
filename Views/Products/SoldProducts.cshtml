@@ -1,0 +1,109 @@
+﻿@model IEnumerable<dynamic>
+
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Title"] = "Sold Products";
+
+    var totalRevenue = Model.Sum(x => (decimal)x.Price);
+    var totalSold = Model.Count();
+}
+
+<style>
+    .card-box {
+        background: white;
+        border-radius: 15px;
+        padding: 20px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+    }
+
+    .stat-card {
+        border-radius: 15px;
+        padding: 20px;
+        color: white;
+        font-weight: bold;
+    }
+
+    .bg-green { background: linear-gradient(135deg, #22c55e, #15803d); }
+    .bg-blue { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+
+    .table-hover tbody tr:hover {
+        background-color: #f9fafb;
+    }
+</style>
+
+<div class="container-fluid mt-4">
+
+    <h2 class="mb-4 fw-bold">🛒 Sold Products</h2>
+
+    <!-- 🔥 STATS -->
+    <div class="row mb-4">
+
+        <div class="col-md-3">
+            <div class="stat-card bg-green">
+                💰 Total Revenue
+                <h3>₹ @totalRevenue</h3>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="stat-card bg-blue">
+                📦 Total Sold
+                <h3>@totalSold</h3>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- 📋 TABLE -->
+    <div class="card-box">
+
+        <table class="table table-hover align-middle">
+
+            <thead class="table-light">
+                <tr>
+                    <th>Product</th>
+                    <th>Category</th>
+                    <th>Price</th>
+                    <th>Seller</th>
+                    <th>Buyer</th>
+                    <th>Sold Date</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                @foreach (var item in Model)
+                {
+                    <tr>
+
+                        <td class="fw-semibold">@item.Name</td>
+
+                        <td>@item.Category</td>
+
+                        <td>₹ @item.Price</td>
+
+                        <td>@item.Seller</td>
+
+                        <td>@(item.Buyer ?? "N/A")</td>
+
+                        <td>
+                            @(item.SoldAt != null
+                                ? ((DateTime)item.SoldAt).ToString("dd MMM yyyy hh:mm tt")
+                                : "N/A")
+                        </td>
+
+                        <td>
+                            <span class="badge bg-success">Sold</span>
+                        </td>
+
+                    </tr>
+                }
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>

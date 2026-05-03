@@ -1,0 +1,146 @@
+﻿@model IEnumerable<CampusConnect.Models.ApplicationUser>
+
+@inject CampusConnect.Data.ApplicationDbContext _context
+
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Title"] = "Users";
+}
+
+<style>
+    .card-box {
+        background: white;
+        border-radius: 15px;
+        padding: 20px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+    }
+
+    .user-img {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: #f9fafb;
+    }
+
+    .badge-soft {
+        background: #e0f2fe;
+        color: #0369a1;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 12px;
+    }
+
+    /* 🔴 Highlight deleted users */
+    .deleted-row {
+        background-color: #fee2e2 !important;
+    }
+</style>
+
+<div class="container-fluid mt-4">
+
+    <h2 class="mb-4 fw-bold">👤 All Users</h2>
+
+    <div class="card-box">
+
+        <table class="table table-hover align-middle">
+
+            <thead class="table-light">
+                <tr>
+                    <th>User</th>
+                    <th>Email</th>
+                    <th>Products</th>
+                    <th>Rating</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                @foreach (var user in Model)
+                {
+                    var profile = _context.UserProfiles
+                        .FirstOrDefault(p => p.UserId == user.Id);
+
+                    var productCount = _context.Products
+                        .Count(p => p.UserId == user.Id);
+
+                    var rating = _context.Reviews
+                        .Where(r => r.SellerId == user.Id)
+                        .Select(r => (double?)r.Rating)
+                        .Average() ?? 0;
+
+                    <tr class="@(user.IsDeleted ? "deleted-row" : "")">
+
+                        <!-- PROFILE IMAGE -->
+                        <td>
+                            <img src="@(profile?.ProfileImagePath ?? "/images/default-user.png")"
+                                 class="user-img"
+                                 onerror="this.src='/images/default-user.png'" />
+                        </td>
+
+                        <!-- EMAIL -->
+                        <td class="fw-semibold">
+                            @user.Email
+
+                            @if (user.IsDeleted)
+                            {
+                                <span class="badge bg-danger ms-2">Deleted</span>
+                            }
+                        </td>
+
+                        <!-- PRODUCTS -->
+                        <td>
+                            <span class="badge-soft">
+                                📦 @productCount
+                            </span>
+                        </td>
+
+                        <!-- RATING -->
+                        <td>
+                            ⭐ @Math.Round(rating, 1)
+                        </td>
+
+                        <!-- ACTION -->
+                        <td>
+
+                            <!-- VIEW -->
+                            <a asp-controller="Admin"
+                                   asp-action="UserDetails"
+                                   asp-route-id="@user.Id"
+                                   class="btn btn-primary btn-sm">
+                                👁 View
+                            </a>
+
+                            <!-- 🔄 RESTORE BUTTON -->
+                            @if (user.IsDeleted)
+                            {
+                                <form asp-controller="Admin"
+                                      asp-action="RestoreUser"
+                                      method="post"
+                                      style="display:inline;">
+
+                                    <input type="hidden" name="id" value="@user.Id" />
+
+                                    <button type="submit"
+                                            class="btn btn-success btn-sm ms-2">
+                                        🔄 Restore
+                                    </button>
+                                </form>
+                            }
+
+                        </td>
+
+                    </tr>
+                }
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>

@@ -1,0 +1,178 @@
+﻿@model IEnumerable<CampusConnect.Models.Product>
+
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Title"] = "Admin Products";
+}
+
+<style>
+    .card-box {
+        background: white;
+        border-radius: 15px;
+        padding: 20px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+    }
+
+    .table img {
+        border-radius: 8px;
+        object-fit: cover;
+    }
+
+    .badge-status {
+        padding: 5px 10px;
+        border-radius: 20px;
+        font-size: 12px;
+    }
+
+    .approved { background: #dcfce7; color: #15803d; }
+    .pending { background: #fef3c7; color: #b45309; }
+    .rejected { background: #fee2e2; color: #b91c1c; }
+    .sold { background: #e0f2fe; color: #0369a1; }
+
+    .table-hover tbody tr:hover {
+        background-color: #f9fafb;
+    }
+</style>
+
+<div class="container-fluid mt-4">
+
+    <h2 class="mb-4 fw-bold">📦 Admin Product Panel</h2>
+
+    <!-- 🔍 SEARCH -->
+    <div class="card-box mb-4">
+        <form method="get" class="row g-3">
+
+            <div class="col-md-4">
+                <input type="text"
+                       name="searchString"
+                       class="form-control"
+                       placeholder="Search product, email, category..."
+                       value="@Context.Request.Query["searchString"]" />
+            </div>
+
+            <div class="col-md-4">
+                <select name="sortOrder" class="form-control">
+                    <option value="">Sort By Latest</option>
+                    <option value="name_desc">Name (Z-A)</option>
+                    <option value="price_asc">Price (Low → High)</option>
+                    <option value="price_desc">Price (High → Low)</option>
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100">
+                    🔍 Apply
+                </button>
+            </div>
+
+        </form>
+    </div>
+
+    <!-- 📋 TABLE -->
+    <div class="card-box">
+
+        <table class="table table-hover align-middle">
+
+            <thead class="table-light">
+                <tr>
+                    <th>Image</th>
+                    <th>Product</th>
+                    <th>Price</th>
+                    <th>Category</th>
+                    <th>Uploaded By</th>
+                    <th>Uploaded At</th> <!-- ✅ NEW -->
+                    <th>Status</th>
+                    <th style="width:220px;">Actions</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                @foreach (var item in Model)
+                {
+                    <tr>
+
+                        <!-- IMAGE -->
+                        <td>
+                            <img src="@(item.ImagePath ?? "/images/no-image.png")"
+                                 width="70" height="70"
+                                 onerror="this.src='/images/no-image.png'" />
+                        </td>
+
+                        <!-- NAME -->
+                        <td class="fw-semibold">@item.Name</td>
+
+                        <!-- PRICE -->
+                        <td>₹@item.Price</td>
+
+                        <!-- CATEGORY -->
+                        <td>@item.Category?.Name</td>
+
+                        <!-- USER -->
+                        <td>@item.User?.Email</td>
+
+                        <!-- 📅 DATE TIME -->
+                        <td>
+                            @item.CreatedAt.ToString("dd MMM yyyy")
+                            <br />
+                            <small class="text-muted">
+                                @item.CreatedAt.ToString("hh:mm tt")
+                            </small>
+                        </td>
+
+                        <!-- STATUS -->
+                        <td>
+                            @if (item.IsSold)
+                            {
+                                <span class="badge-status sold">Sold</span>
+                            }
+                            else if (item.IsRejected)
+                            {
+                                <span class="badge-status rejected">Rejected</span>
+                            }
+                            else if (item.IsApproved)
+                            {
+                                <span class="badge-status approved">Approved</span>
+                            }
+                            else
+                            {
+                                <span class="badge-status pending">Pending</span>
+                            }
+                        </td>
+
+                        <!-- ACTIONS -->
+                        <td>
+
+                            <a asp-action="AdminDetails"
+                               asp-route-id="@item.Id"
+                               class="btn btn-info btn-sm">
+                                👁 View
+                            </a>
+
+                            @if (!item.IsApproved && !item.IsRejected)
+                            {
+                                <a asp-action="Approve"
+                                   asp-route-id="@item.Id"
+                                   class="btn btn-success btn-sm">
+                                    ✔ Approve
+                                </a>
+
+                                <a asp-action="Reject"
+                                   asp-route-id="@item.Id"
+                                   class="btn btn-danger btn-sm">
+                                    ✖ Reject
+                                </a>
+                            }
+
+                        </td>
+
+                    </tr>
+                }
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>

@@ -1,0 +1,22 @@
+﻿@model IEnumerable<CampusConnect.Models.UserProfile>
+
+<h2>Student Profiles</h2>
+
+<table class="table">
+
+    <tr>
+        <th>Name</th>
+        <th>College</th>
+        <th>Phone</th>
+    </tr>
+
+    @foreach (var user in Model)
+    {
+        <tr>
+            <td>@user.FirstName @user.LastName</td>
+            <td>@user.College?.Name</td>
+            <td>@user.PhoneNumber</td>
+        </tr>
+    }
+
+</table>
