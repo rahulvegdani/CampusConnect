@@ -1,462 +1,261 @@
-\# CampusConnect 🎓🛒
+# CampusConnect 🎓🛒
 
+CampusConnect is a campus-based student marketplace platform where students can buy and sell products within their college community.
 
+The platform helps students connect, communicate, and trade products in a trusted campus environment.
 
-A campus-based student marketplace platform built to help students buy and sell products within their college community.
+---
 
+## Project Overview
 
+CampusConnect is designed to simplify campus buying and selling.
 
-CampusConnect provides a secure and simple environment where students can list products, explore the marketplace, connect with sellers in real time, manage wishlists, and receive notifications.
+Students can:
 
+* Sell products
+* Buy products
+* Add products to wishlist
+* Chat with sellers in real time
+* Receive instant notifications
+* Manage their profiles
 
+This creates a safe and organized student marketplace.
 
-\---
+---
 
+## Features
 
+### User Features
 
-\## Overview
-
-
-
-CampusConnect is designed to solve the problem of buying and selling second-hand products within a college campus.
-
-
-
-Instead of using public marketplaces, students can connect directly with trusted campus members.
-
-
-
-This platform creates a safer and more convenient buying/selling experience.
-
-
-
-\---
-
-
-
-\## Core Features
-
-
-
-\### User Features
-
-
-
-✅ User Registration and Login
-
+✅ User Registration
+✅ User Login
 ✅ Profile Management
-
-✅ View Seller Profiles
-
+✅ Seller Profile View
+✅ Buyer Profile View
 ✅ Wishlist Management
-
 ✅ Real-time Chat
+✅ Notification System
 
-✅ Notifications
+---
 
-
-
-\---
-
-
-
-\### Product Features
-
-
+### Product Features
 
 ✅ Add Product
-
 ✅ Edit Product
-
 ✅ Delete Product
-
 ✅ Browse Products
-
 ✅ Search Products
+✅ Filter by Category
+✅ Product Status Tracking
 
-✅ Category Filtering
+---
 
-✅ Product Status Management
-
-
-
-\---
-
-
-
-\### Admin Features
-
-
+### Admin Features
 
 ✅ Admin Dashboard
-
-✅ Product Approval System
-
+✅ Product Approval
 ✅ User Management
-
 ✅ Category Management
-
+✅ Pending Product Management
+✅ Rejected Product Management
 ✅ Sold Product Management
 
-✅ Rejected Product Management
+---
 
+## Real-time Features
 
+* Real-time messaging using SignalR
+* Chat message notifications
+* Wishlist sold product notifications
 
-\---
+---
 
+## Technology Stack
 
+### Backend
 
-\## Real-time Features
+* ASP.NET Core MVC
+* Entity Framework Core
 
+### Frontend
 
+* HTML
+* CSS
+* Bootstrap
+* JavaScript
 
-\* Real-time chat system using SignalR
+### Database
 
-\* New message notifications
+* SQL Server
 
-\* Wishlist product sold notifications
+### Authentication
 
+* ASP.NET Identity
 
+### Real-time Communication
 
-\---
+* SignalR
 
+---
 
+## System Workflow
 
-\## Technology Stack
+1. User registers
+2. User logs in
+3. User completes profile
+4. User explores marketplace
+5. User lists products for selling
+6. Buyer searches products
+7. Buyer adds products to wishlist
+8. Buyer chats with seller
+9. Notifications are triggered
+10. Product gets sold
 
+---
 
+## Project Structure
 
-\### Backend
-
-
-
-\* ASP.NET Core MVC
-
-\* Entity Framework Core
-
-
-
-\### Frontend
-
-
-
-\* HTML
-
-\* CSS
-
-\* Bootstrap
-
-\* JavaScript
-
-
-
-\### Database
-
-
-
-\* SQL Server
-
-
-
-\### Authentication
-
-
-
-\* ASP.NET Identity
-
-
-
-\### Real-time Communication
-
-
-
-\* SignalR
-
-
-
-\---
-
-
-
-\## System Workflow
-
-
-
-1\. User registers an account
-
-2\. User completes profile
-
-3\. User browses marketplace
-
-4\. User adds product for selling
-
-5\. Buyer searches products
-
-6\. Buyer adds products to wishlist
-
-7\. Buyer contacts seller using chat
-
-8\. Notifications are sent for updates
-
-9\. Product gets sold
-
-
-
-\---
-
-
-
-\## Project Structure
-
-
-
-```text
-
+```text id="mjlwmc"
 CampusConnect/
-
 ├── Controllers/
-
 ├── Models/
-
 ├── Views/
-
 ├── Data/
-
 ├── Services/
-
 ├── Hubs/
-
 ├── Helpers/
-
 ├── Migrations/
-
 ├── wwwroot/
-
 ├── screenshots/
-
 ├── Program.cs
-
 ├── CampusConnect.csproj
-
 ├── README.md
-
 └── .gitignore
-
 ```
 
+---
 
+## Project Screenshots
 
-\---
+### Home Page
 
+![Home Page](./screenshots/Home-Page.png)
 
+### Login Page
 
-\## Project Screenshots
+![Login Page](./screenshots/Login-Page.png)
 
+### Register Page
 
+![Register Page](./screenshots/Register-Page.png)
 
-\### Home Page
+### Market Page
 
+![Market Page](./screenshots/Market-Page.png)
 
+### Add Product Page
 
-!\[Home Page](screenshots/Home%20Page.png)
+![Add Product Page](./screenshots/AddProduct-Page.png)
 
+### My Profile Page
 
+![My Profile Page](./screenshots/MyProfile-Page.png)
 
-\### Login Page
+### Profile Review Page
 
+![Profile Review Page](./screenshots/MyProfile-Review.png)
 
+### My Product Page
 
-!\[Login Page](screenshots/Login%20Page.png)
+![My Product Page](./screenshots/MyProduct-Page.png)
 
+### Chat Page
 
+![Chat Page](./screenshots/Message-Page.png)
 
-\### Market Page
+### Wishlist Page
 
+![Wishlist Page](./screenshots/WishList-Page.png)
 
+### Notification Page
 
-!\[Market Page](screenshots/Market%20Page.png)
+![Notification Page](./screenshots/Notification-Page.png)
 
+### Admin Dashboard Page
 
+![Admin Dashboard](./screenshots/Admin-Dashboard-Page.png)
 
-\### Add Product Page
+### Admin All Product Page
 
+![Admin All Product](./screenshots/Admin-AllProduct-Page.png)
 
+### Admin Pending Product Page
 
-!\[Add Product Page](screenshots/AddProduct%20Page.png)
+![Admin Pending Product](./screenshots/Admin-PendingProduct-Page.png)
 
+### Admin Rejected Product Page
 
+![Admin Rejected Product](./screenshots/Admin-RejectedProduct-Page.png)
 
-\### My Profile Page
+### Admin Sold Product Page
 
+![Admin Sold Product](./screenshots/Admin-SoldProduct-Page.png)
 
+### Admin User Management Page
 
-!\[My Profile Page](screenshots/MyProfile%20Page.png)
+![Admin User View](./screenshots/Admin-AllUserView-Page.png)
 
+### Admin Category Management Page
 
+![Admin Category Management](./screenshots/Admin-CategoryManagement-Page.png)
 
-\### Chat Page
+---
 
+## Installation
 
+Clone the repository:
 
-!\[Chat Page](screenshots/Message%20Page.png)
-
-
-
-\### Wishlist Page
-
-
-
-!\[Wishlist Page](screenshots/WishList%20Page.png)
-
-
-
-\### Notification Page
-
-
-
-!\[Notification Page](screenshots/Notification.png)
-
-
-
-\### Admin Dashboard
-
-
-
-!\[Admin Dashboard](screenshots/Admin%20Dashboard%20Page.png)
-
-
-
-\---
-
-
-
-\## Installation
-
-
-
-\### Clone Repository
-
-
-
-```bash
-
+```bash id="dclbks"
 git clone https://github.com/rahulvegdani/CampusConnect.git
-
 ```
 
+Open the project in Visual Studio.
 
+Configure SQL Server connection string in:
 
-\---
-
-
-
-\### Open Project
-
-
-
-Open the solution file in Visual Studio.
-
-
-
-\---
-
-
-
-\### Configure Database
-
-
-
-Update your SQL Server connection string inside:
-
-
-
-```text
-
+```text id="isdbdn"
 appsettings.json
-
 ```
 
+Run database migration:
 
-
-\---
-
-
-
-\### Run Database Migration
-
-
-
-Run:
-
-
-
-```powershell
-
+```powershell id="97gks0"
 Update-Database
-
 ```
 
+Run project:
 
-
-\---
-
-
-
-\### Run Project
-
-
-
-Press:
-
-
-
-```text
-
+```text id="s9m70f"
 Ctrl + F5
-
 ```
 
+---
 
+## Future Enhancements
 
-\---
+* AI-based product recommendations
+* Mobile application
+* Online payment integration
+* Review and rating system
 
+---
 
-
-\## Future Enhancements
-
-
-
-\* AI-based product recommendations
-
-\* Mobile application
-
-\* Online payment integration
-
-\* Review and rating system
-
-
-
-\---
-
-
-
-\## Author
-
-
+## Author
 
 Rahul Vegdani
 
+---
 
-
-\---
-
-
-
-\## Status
-
-
+## Status
 
 🚀 Active Development
-
-
-
